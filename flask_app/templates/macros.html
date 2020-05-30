@@ -1,0 +1,334 @@
+{% macro modal() %}
+    <div id="myModal" class="my-modal">
+        <div class="my-modal-content">
+            <div class="my-modal-header">
+                <span id="my-close">&times;</span>
+                <h2>Выберите технику пропаганды</h2>
+            </div>
+            <div class="my-modal-body">
+                <form id="answers">
+                    <button type="button" class="btn btn-primary btn-lg" id="ok">OK</button>
+                </form>
+            </div>
+            <div id="my-modal-footer" style="white-space: pre-line;"><h3 style="text-align: center;"></h3></div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro textarea(type) %}
+    <script>
+        // updates text field and empties id of the text
+        $('#textarea{{ type }}').on('input', function() {
+
+            let str = $(this).val();
+            let full_str = textToSpans(str, "{{ type }}");
+            $("#textarea{{ type }}").val(full_str.replace(/(<([^>]+)>)/ig,"").replace(/(&nbsp;)/ig, " ").replace(/(&#8209;)/ig, "-"));
+            $("#text{{ type }}").empty().append(full_str);
+            localStorage.removeItem('name{{ type }}');
+            localStorage.removeItem('list{{ type }}');
+            localStorage.setItem('text{{ type }}', full_str);
+            for (let i = 0, length = $("span").length; i < length; i++) {
+                $("#id{{ type }}" + i).removeAttr("data-tooltip");
+                $("#id{{ type }}" + i).removeAttr("data-tooltip-position");
+                $("#text{{ type }}" + " span:nth-child(" + i + ")").css({'background-color': ''});
+            }
+            $("#span_id{{ type }}").attr("name", "");
+            {% if type|string() == '_test' %}
+                let full_text = $("#text{{ type }}").text().toString();
+                let id_ = parseInt($("#span_id{{ type }}").attr('name'));
+                if (!id_)
+                    id_ = null;
+
+                if (full_text.trim()) {
+                    $("#status").css('display', 'none');
+                    $("#loader").css('display', 'block');
+                    localStorage.setItem('path_to_picture', '');
+                    let model_type = $('input[name=options]:checked').attr('data-name');
+                    $.post('/_launch_model', {
+                        full_text: full_text,
+                        id: id_,
+                        model_type: model_type,
+                    }, function (data) {
+                        data = data.result;
+                        $("#span_id{{ type }}").attr('name', data.id);
+
+                        let str = data.text;
+                        let full_str = textToSpans(str, "{{ type }}");
+                        $("#textarea{{ type }}").val(full_str.replace(/(<([^>]+)>)/ig,"").replace(/(&nbsp;)/ig, " ").replace(/(&#8209;)/ig, "-"));
+                        $("#text{{ type }}").empty().append(full_str);
+                        localStorage.setItem('text{{ type }}', full_str);
+                        localStorage.setItem('prop_sents', JSON.stringify(data.prop_sents));
+
+                        $("#status").attr('src', '/static/checkmark.png');
+                        $("#status").css('display', 'block');
+                        $("#loader").css('display', 'none');
+                        localStorage.setItem('path_to_picture', '/static/checkmark.png');
+                        localStorage.setItem('name{{ type }}', data.id);
+                        let lst = data.list;
+                        localStorage.setItem('list{{ type }}', JSON.stringify(lst));
+
+                        let text = localStorage.getItem('text{{ type }}');
+                        if (text) {
+                            $("#textarea{{ type }}").val(text.replace(/(<([^>]+)>)/ig,"").replace(/(&nbsp;)/ig, " ").replace(/(&#8209;)/ig, "-"));
+                            $("#text{{ type }}").empty().append(text);
+                            let name = localStorage.getItem('name{{ type }}');
+                            if (name)
+                                $("#span_id{{ type }}").attr('name', name);
+                            let lst = JSON.parse(localStorage.getItem('list{{ type }}'));
+                            if (lst) {
+                                for (let i = 0, length = lst.length; i < length; i++) {
+                                    dct = {};
+                                    if (data.prop_sents) {
+                                        if (data.prop_sents[i])
+                                            dct['text-decoration'] = 'underline';
+                                        else
+                                            dct['text-decoration'] = 'none';
+                                    }
+                                    if (lst[i]) {
+                                        $("#id{{ type }}" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                                        $("#id{{ type }}" + i).attr("data-tooltip-position", "top");
+                                        let techniques = lst[i].split('; ');
+                                        let mainColor = getColor(TECHNIQUES.indexOf(techniques[0]));
+                                        for (let technique of techniques.slice(1))
+                                            mainColor = blendColors(mainColor, getColor(TECHNIQUES.indexOf(technique)));
+
+                                        if (mainColor !== "rgba(255,255,255,0.5)") {
+                                            dct['background-color'] = mainColor;
+                                        } else {
+                                            dct['background-color'] = '';
+                                            $("#id{{ type }}" + i).removeAttr("data-tooltip");
+                                            $("#id{{ type }}" + i).removeAttr("data-tooltip-position");
+                                        }
+                                    }
+                                    $("#text{{ type }} span:nth-child(" + (i + 1) + ")").css(dct);
+                                }
+                            }
+                        }
+
+                        for (let i = 0, length = lst.length; i < length; i++) {
+                            if (lst[i] !== "") {
+                                $("#id{{ type }}" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                                $("#id{{ type }}" + i).attr("data-tooltip-position", "top");
+                            }
+                        }
+                    }, "json");
+                }
+            {% endif %}
+        });
+    </script>
+{% endmacro %}
+
+{% macro modal_window(type) %}
+    <script>
+        // creates modal window
+        $(function() {
+            $("#text{{ type }}").bind('mouseup', function (e) {
+                let selection = '';
+                if (window.getSelection)
+                    selection = window.getSelection();
+                else if (document.selection)
+                    selection = document.selection.createRange();
+                if (selection.toString() !== '') {
+                    $("#myModal").css('display', 'block');
+
+                    if ($('#inlineRadio1').length === 0) {
+                        $.each(TECHNIQUES,
+                            function (i, technique) {
+                                $("#answers").prepend(
+                                    '<div class="form-check form-check-inline">\n' +
+                                    '<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio' +
+                                    (i + 1) + '" value="' + (i + 1) + '">\n' + '<label class="form-check-label" for="inlineRadio' +
+                                    (i + 1) + '">' + technique + '</label>\n' + '</div>'
+                                );
+                            });
+                    }
+                    let range = selection.getRangeAt(0);
+                    let node = range.startContainer.parentElement;
+                    let offset;
+                    for (offset = 0; (node=node.previousSibling); offset++);
+                    selection = selection.toString();
+                    let length = selection.length;
+                    $("#my-modal-footer").children(":first").text('"' + selection + '"' + ' | ' + offset + ':' + (offset + length));
+                }
+            })
+        });
+
+        // closes modal window after tapping on the X
+        $('#my-close').on('click', function() {
+            $("#myModal").css('display', 'none');
+        });
+
+        // closes modal window after tapping outside of modal window
+        var modal = document.getElementById("myModal");
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+{% endmacro %}
+
+{% macro ok(type) %}
+    <script>
+        $('#ok').on('click', function() {
+            let radioValue = $("input[name=inlineRadioOptions]:checked").val();
+            if (radioValue) {
+                let full_text = $("#text{{ type }}").text().toString();
+                let text = $("#my-modal-footer").children(":first").text();
+                let res = text.split(' | ');
+                let extract = res[0].trim('"');
+                let nums = res[1].split(':');
+                let left = parseInt(nums[0]);
+                let right = parseInt(nums[1]);
+                //$("#text{{ type }} span:nth-child(n+" + (left + 1) + "):nth-child(-n+" + right + ")").css({
+                //    'background-color': getColor(radioValue - 1)
+                //});
+                let mainColor = getColor(radioValue - 1);
+                for (let i = left + 1; i < right + 1; i++) {
+                    let backgroundColor = $("#text{{ type }} span:nth-child(" + i + ")").css('background-color');
+                    if (backgroundColor && mainColor !== "rgba(255,255,255,0.5)")
+                        $("#text{{ type }} span:nth-child(" + i + ")").css({'background-color': blendColors(mainColor, backgroundColor)});
+                    else {
+                        $("#text{{ type }} span:nth-child(" + i + ")").css({'background-color': mainColor});
+                        if (mainColor === "rgba(255,255,255,0.5)") {
+                            $("#text{{ type }} span:nth-child(" + i + ")").css({'background-color': ''});
+                            $("#id{{ type }}" + (i - 1)).removeAttr("data-tooltip");
+                            $("#id{{ type }}" + (i - 1)).removeAttr("data-tooltip-position");
+                        }
+                    }
+                }
+                let id_ = parseInt($("#span_id{{ type }}").attr('name'));
+                if (!id_)
+                    id_ = null;
+                $.post('/_add_technique', {
+                    full_text: full_text,
+                    left: left,
+                    right: right,
+                    id: id_,
+                    value: radioValue - 1,
+                    type: "{{ type }}",
+                }, function(data) {
+                    data = data.result;
+                    $("#span_id{{ type }}").attr('name', data.id);
+                    localStorage.setItem('name{{ type }}', data.id);
+                    let lst = data.list;
+                    localStorage.setItem('list{{ type }}', JSON.stringify(lst));
+                    for (let i = 0, length = lst.length; i < length; i++) {
+                        if (lst[i] !== "") {
+                            $("#id{{ type }}" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                            $("#id{{ type }}" + i).attr("data-tooltip-position", "top");
+                        }
+                    }
+                }, "json");
+            }
+            $("#myModal").css('display', 'none');
+        });
+    </script>
+{% endmacro %}
+
+{% macro ready() %}
+    <script>
+        function difference(setA, setB) {
+            let _difference = new Set(setA)
+            for (let elem of setB) {
+                _difference.delete(elem)
+            }
+            return _difference
+        }
+
+        $(document).ready(function() {
+            $('#myMainTable').DataTable();
+            $('#random_result').empty().append(localStorage.getItem('random'));
+            $(document.body).on("click", "tr[data-href]", function () {
+                window.location.href = this.dataset.href;
+            });
+
+            let option = localStorage.getItem('option');
+            $("#" + option).prop("checked", true).change();
+
+            let set = new Set(['option1', 'option2', 'option3', 'option4']);
+            let difference_set = difference(set, new Set([option]));
+            $.each(difference_set,
+                function (i, option) {
+                    $("#" + option).prop("checked", false);
+                }
+            );
+
+
+            let pathToPicture = localStorage.getItem('path_to_picture');
+            if (!pathToPicture) {
+                $("#status").attr('src', '/static/checkmark.png');
+                $("#status").css('display', 'block');
+                $("#loader").css('display', 'none');
+            } else {
+                $("#status").attr('src', pathToPicture);
+            }
+
+            let lst = JSON.parse(localStorage.getItem('randomList'));
+            if (lst) {
+                for (let i = 0, length = lst.length; i < length; i++) {
+                    if (lst[i]) {
+                        $("#id__" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                        $("#id__" + i).attr("data-tooltip-position", "top");
+                        let techniques = lst[i].split('; ');
+                        let mainColor = getColor(TECHNIQUES.indexOf(techniques[0]));
+                        for (let technique of techniques.slice(1))
+                            mainColor = blendColors(mainColor, getColor(TECHNIQUES.indexOf(technique)));
+                        if (mainColor !== "rgba(255,255,255,0.5)")
+                            $("#random_result span:nth-child(" + (i + 1) + ")").css({'background-color': mainColor});
+                        else {
+                            $("#random_result span:nth-child(" + (i + 1) + ")").css({'background-color': ''});
+                            $("#id__" + i).removeAttr("data-tooltip");
+                            $("#id__" + i).removeAttr("data-tooltip-position");
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endmacro %}
+
+{% macro color(type) %}
+    <script>
+        $(document).ready(function() {
+            let text = localStorage.getItem('text{{ type }}');
+            if (text) {
+                $("#textarea{{ type }}").val(text.replace(/(<([^>]+)>)/ig,"").replace(/(&nbsp;)/ig, " ").replace(/(&#8209;)/ig, "-"));
+                $("#text{{ type }}").empty().append(text);
+                let name = localStorage.getItem('name{{ type }}');
+                if (name)
+                    $("#span_id{{ type }}").attr('name', name);
+                let lst = JSON.parse(localStorage.getItem('list{{ type }}'));
+                let prop_sents = JSON.parse(localStorage.getItem('prop_sents'));
+                if (lst) {
+                    for (let i = 0, length = lst.length; i < length; i++) {
+                        dct = {};
+                        if (prop_sents) {
+                            if (prop_sents[i])
+                                dct['text-decoration'] = 'underline';
+                            else
+                                dct['text-decoration'] = 'none';
+                        }
+                        if (lst[i]) {
+                            $("#id{{ type }}" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                            $("#id{{ type }}" + i).attr("data-tooltip-position", "top");
+                            let techniques = lst[i].split('; ');
+                            let mainColor = getColor(TECHNIQUES.indexOf(techniques[0]));
+                            for (let technique of techniques.slice(1))
+                                mainColor = blendColors(mainColor, getColor(TECHNIQUES.indexOf(technique)));
+
+                            if (mainColor !== "rgba(255,255,255,0.5)") {
+                                dct['background-color'] = mainColor;
+                            } else {
+                                dct['background-color'] = '';
+                                $("#id{{ type }}" + i).removeAttr("data-tooltip");
+                                $("#id{{ type }}" + i).removeAttr("data-tooltip-position");
+                            }
+                        }
+                        $("#text{{ type }} span:nth-child(" + (i + 1) + ")").css(dct);
+                    }
+                }
+            }
+        });
+    </script>
+{% endmacro %}

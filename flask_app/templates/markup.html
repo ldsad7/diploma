@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block active_second %}active{% endblock %}
+
+{% block content %}
+    <div class="parent">
+        <div class="first_child">
+            <form class="form" action="{{ url_for('index') }}" method="POST">
+                <div class="form-group">
+                    <label for="textarea" class="label">Введите текст</label>
+                    <textarea class="form-control" id="textarea" placeholder="Любой текст..." name="text"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="second_child">
+            <p>Проаннотируйте текст</p>
+            <div>
+                <span style="display:none;" name="" id="span_id"></span>
+                <p style="white-space: pre" id="text">{{ text }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {% from 'macros.html' import modal %}
+    {{ modal() }}
+    {% from 'macros.html' import textarea %}
+    {{ textarea('') }}
+    {% from 'macros.html' import modal_window %}
+    {{ modal_window('') }}
+    {% from 'macros.html' import ok %}
+    {{ ok('') }}
+    {% from 'macros.html' import color %}
+    {{ color('') }}
+    {% from 'macros.html' import ready %}
+    {{ ready() }}
+{% endblock scripts %}

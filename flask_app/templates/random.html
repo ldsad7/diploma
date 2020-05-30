@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block active_fourth %}active{% endblock %}
+
+{% block content %}
+    <div>
+        <button type="button" class="btn btn-danger" id="random"
+                style="display: block; margin: 10% auto 5%; width: 50%; padding: 5% 0; font-size: 3.5vw;">Рандомный пример</button>
+        <div style="text-align: center; margin: 0 10%; white-space: pre">
+            <p id="random_result"></p>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        $('#random').on('click', function() {
+            $.get('/_get_random_model', function(data) {
+                data = data.result;
+                let sent = textToSpans(data.sent, "__");
+                sent = '#' + data.id + ': ' + sent;
+                $('#random_result').empty().append(sent);
+                localStorage.setItem('random', sent);
+                let lst = data.list;
+                localStorage.setItem('randomList', JSON.stringify(lst));
+                if (lst) {
+                    for (let i = 0, length = lst.length; i < length; i++) {
+                        if (lst[i]) {
+                            $("#id__" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                            $("#id__" + i).attr("data-tooltip-position", "top");
+                            let techniques = lst[i].split('; ');
+                            let mainColor = getColor(TECHNIQUES.indexOf(techniques[0]));
+                            for (let technique of techniques.slice(1))
+                                mainColor = blendColors(mainColor, getColor(TECHNIQUES.indexOf(technique)));
+                            if (mainColor !== "rgba(255,255,255,0.5)")
+                                $("#random_result span:nth-child(" + (i + 1) + ")").css({'background-color': mainColor});
+                            else {
+                                $("#random_result span:nth-child(" + (i + 1) + ")").css({'background-color': ''});
+                                $("#id__" + i).removeAttr("data-tooltip");
+                                $("#id__" + i).removeAttr("data-tooltip-position");
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock scripts %}

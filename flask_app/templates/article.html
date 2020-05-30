@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style="margin:20px 10%;">
+        {#        <span style="display:none;" name="" id="span_id"></span>#}
+        <h2 style="text-align: center;" id="article_title">{{ title }}</h2>
+        <p style="white-space: pre" id="article_text">{{ text }}</p>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            let text = $("#article_text").text();
+            $("#article_text").empty().append(textToSpans(text, "_"));
+
+            text = $("#article_title").text();
+            text = text.split('-').join('&#8209;');
+            text = text.replace(/\u00a0/g, " ");
+            $("#article_title").empty().append(text);
+
+            let lst = JSON.parse('{{ list | tojson }}');
+            if (lst) {
+                for (let i = 0, length = lst.length; i < length; i++) {
+                    if (lst[i]) {
+                        $("#id_" + i).attr("data-tooltip", lst[i].split("; ").join(",\n"));
+                        $("#id_" + i).attr("data-tooltip-position", "top");
+                        let techniques = lst[i].split('; ');
+                        let mainColor = getColor(TECHNIQUES.indexOf(techniques[0]));
+                        for (let technique of techniques.slice(1))
+                            mainColor = blendColors(mainColor, getColor(TECHNIQUES.indexOf(technique)));
+                        if (mainColor !== "rgba(255,255,255,0.5)")
+                            $("#article_text span:nth-child(" + (i + 1) + ")").css({'background-color': mainColor});
+                        else {
+                            $("#article_text span:nth-child(" + (i + 1) + ")").css({'background-color': ''});
+                            $("#id_" + i).removeAttr("data-tooltip");
+                            $("#id_" + i).removeAttr("data-tooltip-position");
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock scripts %}

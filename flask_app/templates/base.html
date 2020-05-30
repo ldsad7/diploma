@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/5/51/Markup_icon.png">
+        <title>Markup</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="http://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+        <style>
+            html {
+                hyphens: none;
+            }
+
+            html, body, .parent, .form-group, .form, textarea.form-control, .first_child, .second_child {
+                height: 96%;
+            }
+            .first_child, .second_child {
+                margin: 20px;
+                width: calc(50% - 40px);
+            }
+            .first_child {
+                float: left;
+            }
+            .second_child {
+                float: right;
+            }
+            .second_child > p {
+                text-align: center;
+            }
+            label.label {
+                display: block;
+                text-align: center;
+            }
+            /* The Modal (background) */
+            .my-modal {
+              display: none; /* Hidden by default */
+              position: fixed; /* Stay in place */
+              z-index: 1; /* Sit on top */
+              left: 0;
+              top: 0;
+              width: 100%; /* Full width */
+              height: 100%; /* Full height */
+              overflow: auto; /* Enable scroll if needed */
+              background-color: rgb(0,0,0); /* Fallback color */
+              background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+              -webkit-animation-name: fadeIn; /* Fade in the background */
+              -webkit-animation-duration: 0.4s;
+              animation-name: fadeIn;
+              animation-duration: 0.4s
+            }
+
+            /* Modal Content */
+            .my-modal-content {
+              position: fixed;
+              bottom: 0;
+              background-color: #fefefe;
+              width: 100%;
+              -webkit-animation-name: slideIn;
+              -webkit-animation-duration: 0.4s;
+              animation-name: slideIn;
+              animation-duration: 0.4s
+            }
+
+            /* The Close Button */
+            #my-close {
+              color: white;
+              float: right;
+              font-size: 28px;
+              font-weight: bold;
+            }
+
+            #my-close:hover,
+            #my-close:focus {
+              color: #000;
+              text-decoration: none;
+              cursor: pointer;
+            }
+
+            .my-modal-header {
+              padding: 2px 16px;
+              background-color: #5cb85c;
+              color: white;
+            }
+
+            .my-modal-body {padding: 2px 16px;}
+
+            #my-modal-footer {
+              padding: 2px 16px;
+              background-color: #5cb85c;
+              color: white;
+            }
+
+            #ok {
+                border-radius: 25px;
+            }
+
+            .form-check-inline {
+                margin: 10px;
+                border-width: 3px;
+                border-color: black;
+                border-style: inset;
+                border-radius: 25px;
+                padding: 5px;
+            }
+
+            /* Add Animation */
+            @-webkit-keyframes slideIn {
+              from {bottom: -300px; opacity: 0}
+              to {bottom: 0; opacity: 1}
+            }
+
+            @keyframes slideIn {
+              from {bottom: -300px; opacity: 0}
+              to {bottom: 0; opacity: 1}
+            }
+
+            @-webkit-keyframes fadeIn {
+              from {opacity: 0}
+              to {opacity: 1}
+            }
+
+            @keyframes fadeIn {
+              from {opacity: 0}
+              to {opacity: 1}
+            }
+
+            #article_text span, #random_result span, #text span, #text_test span {
+                display: inline;
+            }
+
+            [data-tooltip] {
+                display: inline-block;
+                position: relative;
+                cursor: help;
+            }
+
+            /* Tooltip stiyling */
+            [data-tooltip]:before {
+                content: attr(data-tooltip);
+                display: none;
+                position: absolute;
+                background: #000;
+                color: #fff;
+                padding: 4px 8px;
+                font-size: 14px;
+                line-height: 1.4;
+                min-width: 200px;
+                text-align: center;
+                border-radius: 4px;
+            }
+
+            [data-tooltip-position="top"]:before {
+                left: 50%;
+                -ms-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -webkit-transform: translateX(-50%);
+                transform: translateX(-50%);
+            }
+
+            [data-tooltip-position="top"]:before {
+                bottom: 100%;
+                margin-bottom: 6px;
+            }
+
+            [data-tooltip]:after {
+                content: '';
+                display: none;
+                position: absolute;
+                width: 0;
+                height: 0;
+                border-color: transparent;
+                border-style: solid;
+            }
+
+            [data-tooltip-position="top"]:after {
+                left: 50%;
+                margin-left: -6px;
+            }
+
+            [data-tooltip-position="top"]:after {
+                bottom: 100%;
+                border-width: 6px 6px 0;
+                border-top-color: #000;
+            }
+
+            [data-tooltip]:hover:before,
+            [data-tooltip]:hover:after {
+                display: inline-block;
+                z-index: 100;
+            }
+
+            .mt-3 {
+                margin-bottom: 1rem!important;
+            }
+
+            tr[data-href] {
+                cursor: pointer;
+            }
+
+            #loader {
+                border: 8px solid #f3f3f3;
+                border-radius: 50%;
+                border-top: 8px solid #3498db;
+                width: 50px;
+                height: 50px;
+                -webkit-animation: spin 2s linear infinite; /* Safari */
+                animation: spin 2s linear infinite;
+            }
+
+            /* Safari */
+            @-webkit-keyframes spin {
+                0% { -webkit-transform: rotate(0deg); }
+                100% { -webkit-transform: rotate(360deg); }
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Propaganda Detection</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item {% block active_first %}{% endblock %}">
+                        <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+                    </li>
+                    <li class="nav-item {% block active_second %}{% endblock %}">
+                        <a class="nav-link" href="{{ url_for('markup') }}">Markup</a>
+                    </li>
+                    <li class="nav-item {% block active_third %}{% endblock %}">
+                        <a class="nav-link" href="{{ url_for('test') }}">Test</a>
+                    </li>
+                    <li class="nav-item {% block active_fourth %}{% endblock %}">
+                        <a class="nav-link" href="{{ url_for('random') }}">Random</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Info</a>
+                    </li>
+                </ul>
+                <a href="http://github.com/" target="_blank" rel="noopener noreferrer">Github</a>
+            </div>
+        </nav>
+
+        {% block content %}{% endblock %}
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script src="http://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <script>
+            let TECHNIQUES = [
+                "No", "Whataboutism", "Thought-terminating Cliches", "Straw Men", "Slogans",
+                "Repetition", "Reductio ad hitlerum", "Red Herring",
+                "Obfuscation, Intentional Vagueness, Confusion", "Name Calling, Labeling",
+                "Loaded Language", "Flag-Waving", "Exaggeration, Minimisation", "Doubt",
+                "Causal Oversimplification", "Black-and-White Fallacy", "Bandwagon",
+                "Appeal to fear-prejudice", "Appeal to Authority"
+            ];
+            let COLORS = [
+                "rgba(255,255,255,0.5)", "rgba(0,0,128,0.5)", "rgba(0,128,0,0.5)",
+                "rgba(192,192,192,0.5)", "rgba(0,0,0,0.5)", "rgba(0,0,255,0.5)",
+                "rgba(165,42,42,0.5)", "rgba(0,0,139,0.5)", "rgba(0,139,139,0.5)",
+                "rgba(169,169,169,0.5)", "rgba(0,100,0,0.5)", "rgba(189,183,107,0.5)",
+                "rgba(139,0,139,0.5)", "rgba(85,107,47,0.5)", "rgba(255,140,0,0.5)",
+                "rgba(153,50,204,0.5)", "rgba(0,128,128,0.5)", "rgba(233,150,122,0.5)",
+                "rgba(0,255,0,0.5)"
+            ];
+
+            function textToSpans(str, type) {
+                let full_str = '';
+                for (let i = 0; i < str.length; i++) {
+                    if (str.charAt(i) === ' ')
+                        full_str += '<span id="id' + type + i + '">' + str.charAt(i) + '<wbr>' + '</span>';
+                    else if (str.charAt(i) === '-')
+                        full_str += '<span id="id' + type + i + '">' + '&#8209;' + '</span>';
+                    else
+                        full_str += '<span id="id' + type + i + '">' + str.charAt(i) + '</span>';
+                }
+                return full_str;
+            }
+
+            // get color for propaganda techniques
+            function getColor(i) {
+                return COLORS[i];
+            }
+
+            // blend colors
+            function blendColors(base, added) {
+                var baseNums = base.split('(')[1].trim(')');
+                baseNums = baseNums.split(',');
+                let newBase = [parseInt(baseNums[0]), parseInt(baseNums[1]), parseInt(baseNums[2]), parseFloat(baseNums[3])];
+                var addedNums = added.split('(')[1].trim(')');
+                addedNums = addedNums.split(',');
+                let newAdded = [parseInt(addedNums[0]), parseInt(addedNums[1]), parseInt(addedNums[2]), parseFloat(addedNums[3])];
+
+                var mix = [];
+                mix[3] = 1 - (1 - newAdded[3]) * (1 - newBase[3]); // alpha
+                mix[0] = Math.round((newAdded[0] * newAdded[3] / mix[3]) + (newBase[0] * newBase[3] * (1 - newAdded[3]) / mix[3])); // red
+                mix[1] = Math.round((newAdded[1] * newAdded[3] / mix[3]) + (newBase[1] * newBase[3] * (1 - newAdded[3]) / mix[3])); // green
+                mix[2] = Math.round((newAdded[2] * newAdded[3] / mix[3]) + (newBase[2] * newBase[3] * (1 - newAdded[3]) / mix[3])); // blue
+                return "rgba(" + mix[0] + ", " + mix[1] + ", " + mix[2] + ", " + mix[3] + ")";
+            }
+        </script>
+
+        <script>
+            $('input[type=radio][name=options]').change(function() {
+                localStorage.setItem('option', this.id);
+            });
+        </script>
+
+        {% from 'macros.html' import ready %}
+        {{ ready() }}
+        {% block scripts %}
+        {% endblock scripts %}
+    </body>
+</html>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block active_third %}active{% endblock %}
+
+{% block content %}
+    <div class="parent">
+        <div class="first_child">
+            <form class="form" action="{{ url_for('index') }}" method="POST">
+                <div class="form-group">
+                    <label for="textarea_test" class="label">Введите текст</label>
+                    <textarea class="form-control" id="textarea_test" placeholder="Любой текст..." name="text_test"></textarea>
+                </div>
+            </form>
+            <div style="vertical-align: middle; display: flex; align-items: center; justify-content: center;">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons" style="float: left; width: calc(100% - 60px); margin: 0 10px 0 0;">
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="option1" data-name="BERT_ru" autocomplete="off">BERT
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="option2" data-name="BERT_JOINT_model_ru" autocomplete="off">Joint BERT
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="option3" data-name="BERT_GRAN_model_ru" autocomplete="off">Granular BERT
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="option4" data-name="BERT_MULTIGRAN_model_sigmoid_ru" autocomplete="off">Multigranular BERT
+                    </label>
+                </div>
+                <img id="status" src="" style="height: 50px;">
+                <div id="loader" style="display:none;"></div>
+            </div>
+        </div>
+        <div class="second_child">
+            <p>Исправьте ошибки в разметке</p>
+            <div>
+                <span style="display:none;" name="" id="span_id_test"></span>
+                <p style="white-space: pre" id="text_test">{{ text }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {% from 'macros.html' import modal %}
+    {{ modal() }}
+    {% from 'macros.html' import textarea %}
+    {{ textarea('_test') }}
+    {% from 'macros.html' import modal_window %}
+    {{ modal_window('_test') }}
+    {% from 'macros.html' import ok %}
+    {{ ok('_test') }}
+    {% from 'macros.html' import color %}
+    {{ color('_test') }}
+{% endblock scripts %}
