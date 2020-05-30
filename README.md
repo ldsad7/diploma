@@ -9,16 +9,16 @@ jupyter_notebooks/count_statistics_and_draw_graphs.ipynb
 поэтому, чтобы запустить предобученную модель на тесте, её нужно положить
 в эту папку.
 Допустимые названия моделей:
-1) BERT.pt
+1) BERT_ru.pt
 2) BERT_GRAN_model_ru.pt
 3) BERT_JOINT_model_ru.pt
 4) BERT_MULTIGRAN_model_relu_ru.pt
 5) BERT_MULTIGRAN_model_sigmoid_ru.pt
-6) BERT_GRAN_model.pt
+6) BERT.pt
 7) BERT_JOINT_model.pt
-8) BERT_MULTIGRAN_model_relu.pt
-9) BERT_MULTIGRAN_model_sigmoid.pt
-10) BERT_ru.pt
+8) BERT_GRAN_model.pt
+9) BERT_MULTIGRAN_model_relu.pt
+10) BERT_MULTIGRAN_model_sigmoid.pt
 
 Обученные модели доступны на Google Drive: https://drive.google.com/drive/folders/1c1Hdt6a9vVXb_b4kzUpzpAAf25csuwLj?usp=sharing.
 
@@ -32,7 +32,8 @@ RuBERT [pytorch]):
 3) vocab.txt 
 
 Последовательность действий для запуска приложения из корневой папки:
-0. python -m venv myvenv
-1. python -m pip install -r requirements.txt 
+
+0. python -m venv myvenv; myvenv\Scripts\activate
+1. python -m pip install -r requirements.txt
 2. python flask_application.py
 3. --> 127.0.0.1:5000
