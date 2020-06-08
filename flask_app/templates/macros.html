@@ -238,6 +238,9 @@
 
         $(document).ready(function() {
             $('#myMainTable').DataTable();
+            $('#myMainTable2').DataTable();
+            $('#myMainTable3').DataTable();
+            {#$('#myMainTable4').DataTable();#}
             $('#random_result').empty().append(localStorage.getItem('random'));
             $(document.body).on("click", "tr[data-href]", function () {
                 window.location.href = this.dataset.href;

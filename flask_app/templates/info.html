@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block active_fifth %}active{% endblock %}
+
+{% block content %}
+    <div class="info">
+        <p>ОБНАРУЖЕНИЕ ПРОПАГАНДЫ С ИСПОЛЬЗОВАНИЕМ НЕЙРОННЫХ СЕТЕЙ В НОВОСТНЫХ ТЕКСТАХ НА РУССКОМ ЯЗЫКЕ</p>
+        <span class="right-info">
+            <p>Формальный научный руководитель: <i><a href="/static/Орехов_отзыв_на_ВКР_Григорьев.docx" download>Б.В. Орехов</a></i></p>
+            <p>Настоящий научный руководитель: <i><a href="/static/Еникеева_Отзыв_на_ВКР_Григорьев.pdf" download>Е.В. Еникеева</a></i></p>
+            <p>Рецензент: <i><a href="/static/ВКР_отзыв_рецензента_бак.pdf" download>О.А. Митрофанова</a></i></p>
+        </span>
+        <span class="left-info">
+            <h3>1. Введение</h3>
+            <p>
+                Пропаганда — это вербальная техника, которая ставит своей целью распространение и продвижение чьих-либо идей и взглядов, а также непосредственное влияние на то, что и каким образом слушающие думают о предмете пропаганды.
+            </p>
+            <p>
+                В рамках данной работы мы разработали систему, которая позволяет автоматически размечать статьи на
+                русском языке с помощью уже обученных моделей, а также предоставляет платформу для ручной разметки
+                датасета для дальнейшего обучения моделей. Backend был написан на <i>Python</i>-фреймворке <i>Flask</i>,
+                а модели обучались с помощью библиотеки машинного обучения <i>PyTorch</i>.
+                Система доступна по <a href="http://detectpropaganda.pythonanywhere.com/" target="_blank">URL-адресу</a>.
+            </p>
+            <p>
+                Она позволяет сделать более явным применение пропагандистских техник в новостных и не только
+                статьях и повысить осведомлённость о них среди пользователей. В дальнейшем подобную систему можно
+                встроить, например, в расширения браузеров, чтобы статьи размечались <i>на лету</i> и читающий что-либо был
+                заранее осведомлён о применении тех или иных техник в тексте. Это поможет решить <i>проблему
+                распространения и влияния пропаганды на общественное мнение по крайней мере в интернете</i>.
+            </p>
+            <h3>2. Техники</h3>
+            <p>
+                Мы рассмотрели 68 приведенных на <a href="https://en.wikipedia.org/wiki/Propaganda_techniques" target="_blank">Википедии</a> техник и отобрали из них подходящие для автоматического обнаружения.
+            </p>
+            <p>Термины:
+                <ul>
+                    <li>
+                        Стратегия — тактика продвижения идеи, не относящаяся непосредственно к
+                        употреблениям в тексте.
+                    </li>
+                    <li>
+                        Техника — материализация стратегии, конкретный способ продвижения идеи,
+                        который можно наблюдать в тексте. Мы рассматриваем только те техники,
+                        которые не требуют внешнего контекста.
+                    </li>
+                </ul>
+            </p>
+            <p>Таблица 1. Сжатая информация о техниках
+                <table id="myMainTable2" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Техника</th>
+                            <th>Включается в список?</th>
+                            <th>Примеры / Причина</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for elem in techniques %}
+                        <tr>
+                            <td>{{ elem.id|safe }}</td>
+                            <td>{{ elem.technique|safe }}</td>
+                            <td>{{ elem.include|safe }}</td>
+                            <td>{{ elem.text|safe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </p>
+            <p>
+                Таким образом, мы отобрали <i>18</i> техник.
+            </p>
+            <p style="text-align: center;">Рисунок 2. Количество токенов при употреблении техники<br>
+                <img src="/static/technique_to_num_of_tokens.png">
+            </p>
+            <h3>3. Датасет</h3>
+            <p>
+                Наш датасет состоит из <i>54</i> статей из <i>10</i> источников: <i>288606</i> символов, <i>42396</i> токенов,
+                <i>1383</i> примера употребления техник.
+            </p>
+            <p style="text-align: center;">Рисунок 1. Среднее количество употреблений техник в каждом из источников<br>
+                <img src="/static/source_to_mean_number_of_techniques_1000.png">
+            </p>
+            <p>Таблица 2. Сводная таблица характеристик источников
+                <table id="myMainTable3" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Источник</th>
+                            <th>Количество статей</th>
+                            <th>Среднее количество предложений</th>
+                            <th>Среднее количество символов</th>
+                            <th>Средняя длина предложения в символах</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ТАСС</td>
+                            <td>17</td>
+                            <td>105.24</td>
+                            <td>5752.18</td>
+                            <td>54.66</td>
+                        </tr>
+                        <tr>
+                            <td>RT</td>
+                            <td>12</td>
+                            <td>47.50</td>
+                            <td>5453.92</td>
+                            <td>114.82</td>
+                        </tr>
+                        <tr>
+                            <td>Царьград</td>
+                            <td>10</td>
+                            <td>28.30</td>
+                            <td>2649.50</td>
+                            <td>93.62</td>
+                        </tr>
+                        <tr>
+                            <td>Медуза</td>
+                            <td>5</td>
+                            <td>97.40</td>
+                            <td>12629.80</td>
+                            <td>129.67</td>
+                        </tr>
+                        <tr>
+                            <td>Блог А.А. Навального</td>
+                            <td>3</td>
+                            <td>49.00</td>
+                            <td>4101.00</td>
+                            <td>83.69</td>
+                        </tr>
+                        <tr>
+                            <td>МИР 24</td>
+                            <td>2</td>
+                            <td>45.50</td>
+                            <td>3493.00</td>
+                            <td>76.77</td>
+                        </tr>
+                        <tr>
+                            <td>РБК</td>
+                            <td>2</td>
+                            <td>45.00</td>
+                            <td>5185.00</td>
+                            <td>115.22</td>
+                        </tr>
+                        <tr>
+                            <td>Эхо Москвы</td>
+                            <td>1</td>
+                            <td>11.00</td>
+                            <td>1057.00</td>
+                            <td>96.09</td>
+                        </tr>
+                        <tr>
+                            <td>Сноб</td>
+                            <td>1</td>
+                            <td>21.00</td>
+                            <td>1569.00</td>
+                            <td>74.71</td>
+                        </tr>
+                        <tr>
+                            <td>Вести.Ру</td>
+                            <td>1</td>
+                            <td>43.00</td>
+                            <td>3390.00</td>
+                            <td>78.84</td>
+                        </tr>
+                        <tr>
+                            <td>Всего</td>
+                            <td>54</td>
+                            <td>65.41</td>
+                            <td>5343.57</td>
+                            <td>81.70</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p style="text-align: center;">Рисунок 3. Средняя длина статей источника в символах<br>
+                <img src="/static/source_to_mean_num_of_symbols.png">
+            </p>
+            <p style="text-align: center;">Рисунок 4. Количество употреблений техник во всех источниках<br>
+                <img src="/static/total_stacked_barplot.png">
+            </p>
+            <p>
+                Разметку всех статей производил <i>лишь автор этой работы</i>, который постарался
+                быть максимально нейтральным при разметке, т.к., согласно данным (Da San Martino et al., 2019),
+                личные взгляды разметчика значительно влияют на то, что он считает пропагандой,
+                а что — нет, т.е. если в тексте высказывается мнение, совпадающее с мнением разметчика,
+                то меньше вероятность того, что он посчитает его пропагандистским. С целью избежать
+                этого, автор данной работы абстрагировался от того, что говорят, и фокусировался на том,
+                как говорят, а также рассматривал статьи как нейтральных, так и считающихся пропагандистскими
+                с той или иной стороны источников.
+            </p>
+            <h3>4. Задача</h3>
+            <p>
+                Задача обнаружения пропаганды логически подразделяется на две подзадачи.
+                <ul class="numbers">
+                    <li>Sentence-Level Classification (SLC): определение
+                    того, содержит ли последовательность символов (например, статья, параграф или предложение)
+                    пропаганду или является ли ею? (бинарная классификация)</li>
+                    <li>Fragment-Level Classification (FLC): определение пропагандистского типа объявленной
+                        в FLC пропагандистской последовательности символов (в нашем случае 19 типов,
+                        включая нейтральный; многоклассовая классификация)</li>
+                </ul>
+            </p>
+            <h3>5. Решение</h3>
+            <p>
+                — Обучение с учителем на размеченных данных, используя <a href="https://github.com/huggingface/transformers" target="_blank">(Ru)BERT</a>
+            </p>
+            <h4>5.1. Модели</h4>
+            <p>
+                <ul>Типы моделей:
+                    <li>Baseline: отнесение каждого предложения к пропаганде (SLC) и
+                        каждого токена к самой популярной технике "Loaded Language" (FLC)</li>
+                    <li>BERT: решение каждой подзадачи по отдельности, используя 2 fine-tuned предобученные BERT-модели</li>
+                    <li>Joint-BERT: решение обеих подзадач одновременно в двух слоях поверх BERT-модели</li>
+                    <li>Granu-BERT: решение обеих подзадач одновременно в объединённом слое (SLC → FLC) поверх BERT-модели</li>
+                    <li>Multigranu-BERT: решение обеих подзадач одновременно с несколькими слоями,
+                        следующими друг за другом и упорядоченными от самого общего слоя,
+                        отвечающего за наличие пропаганды во всём документе, к наиболее специфичному
+                        слою, отвечающему за наличие пропаганды на уровне символа</li>
+                </ul>
+            </p>
+            <p>
+                Forward Propagation в <i>Multigranu-BERT</i>:<br>
+                <ul>
+                    <li>На вход каждому слою приходит выход предшествующего слоя o<sub>g<sub>k</sub></sub>
+                        (в самом начале это выход слоя, отвечающего за SLC, а в конце на выходе
+                        из самого последнего softmax-слоя это вероятности каждого из N + 1 классов).</li>
+                    <li>Выход из каждого следующего (более специфичного) слоя умножается на вес,
+                        который вычисляется с помощью обучаемого (посредством BPTT) вентиля f по
+                        формуле: w<sub>g<sub>k</sub></sub> = f(o<sub>g<sub>k</sub></sub>). Вентиль f включает в себя
+                        умножение входного вектора на вектор с функцией активации поверх
+                        (сигмоидной функцией активации или ReLU), на выходе имеем скаляр,
+                        который используется на следующем слое.</li>
+                    <li>Выход следующего слоя поэлементно умножается на этот скаляр:
+                        o<sub>g<sub>k+1</sub></sub> = w<sub>g<sub>k</sub></sub> * o<sub>g<sub>k+1</sub></sub></li>
+                    <li>Далее процесс повторяется...</li>
+                </ul>
+            </p>
+            <p style="text-align: center;">Рисунок 5. Схема модели Multigranu-BERT (Da San Martino et al., 2019)<br>
+                <img src="/static/scheme.png">
+            </p>
+            <h4>5.2. Метрика</h4>
+            <p>
+                <ul>Обозначения:
+                    <li>S ("said") — множество предсказанных алгоритмом последовательностей с применением пропаганды</li>
+                    <li>s ("said") — конкретный представитель S</li>
+                    <li>T ("true") — множество истинных последовательностей</li>
+                    <li>t ("true") — конкретный представитель T</li>
+                    <li>l(x) — функция, присваивающая последовательности x один из N (в нашем случае 18) ярлыков</li>
+                    <li>δ — символ Кронекера</li>
+                    <li>h — нормализующий коэффициент (≠0)</li>
+                </ul>
+            </p>
+            <p style="text-align: center;">Рисунок 6. Формула оценки пересечения предсказанной и истинной последовательностей (Da San Martino et al., 2019)<br>
+                <img src="/static/first_formula.png">
+            </p>
+            <p style="text-align: center;">Рисунок 7. Формула вычисления precision-а (Da San Martino et al., 2019)<br>
+                <img src="/static/second_formula.png">
+            </p>
+            <p style="text-align: center;">Рисунок 8. Формула вычисления recall-а (Da San Martino et al., 2019)<br>
+                <img src="/static/third_formula.png">
+            </p>
+            <p>Таблица 3. Пример S={s<sub>1</sub>, s<sub>2</sub>} и T={t<sub>1</sub>, t<sub>2</sub>}
+                <table class="table table-bordered table-hover">
+                    <tbody>
+                        <tr>
+                            <td>t<sub>1</sub></td>
+                            <td>❌</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>s<sub>1</sub></td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>t<sub>2</sub></td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>s<sub>2</sub></td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p>
+                С(s<sub>1</sub>, t<sub>1</sub>, h) = (3 / h) * 1 = 3 / h
+            </p>
+            <p>
+                C(s<sub>2</sub>, t<sub>2</sub>, h) = (3 / h) * 1 = 3 / h
+            </p>
+            <p>
+                P(S, T) = (1 / 2) *
+                (C(s<sub>1</sub>, t<sub>1</sub>, |s<sub>1</sub>|) +
+                C(s<sub>1</sub>, t<sub>2</sub>, |s<sub>1</sub>|) +
+                C(s<sub>2</sub>, t<sub>1</sub>, |s<sub>2</sub>|) +
+                C(s<sub>2</sub>, t<sub>2</sub>, |s<sub>2</sub>|)) =
+                (1 / 2) *
+                (C(s<sub>1</sub>, t<sub>1</sub>, 4) + 0 + 0 +
+                C(s<sub>2</sub>, t<sub>2</sub>, 3)) =
+                (1 / 2) * (3 / 4 + 3 / 3) = 7 / 8 = 0.875.
+            </p>
+            <p>
+                R(S, T) = (1 / 2) *
+                (С(s<sub>1</sub>, t<sub>1</sub>, |t<sub>1</sub>|) +
+                С(s<sub>1</sub>, t<sub>2</sub>, |t<sub>2</sub>|) +
+                С(s<sub>2</sub>, t<sub>1</sub>, |t<sub>1</sub>|) +
+                С(s<sub>2</sub>, t<sub>2</sub>, |t<sub>2</sub>|)) =
+                (1 / 2) *
+                (С(s<sub>1</sub>, t<sub>1</sub>, 6) + 0 + 0 +
+                С(s<sub>2</sub>, t<sub>2</sub>, 5)) =
+                (1 / 2) * (3 / 6 + 3 / 5) = 11 / 20 = 0.55
+            </p>
+            <p>
+                Micro-Average F<sub>1</sub>(S, T) = 2 * P(S, T) * R(S, T) / (P(S, T) + R(S, T)) = 0.675
+            </p>
+            <h4>5.3. Функция потерь</h4>
+
+            <p>
+                <ul>Обозначения:
+                    <li>α — гиперпараметр ∈ [0; 1]</li>
+                    <li>L<sub>1</sub> — значение функции потерь на SLC</li>
+                    <li>L<sub>2</sub> — значение функции потерь на FLC</li>
+                </ul>
+            </p>
+            <p>
+                Общая функция потерь (для двух подзадач) вычисляется следующим образом:
+                L<sub>total</sub> = α * L<sub>1</sub> + (1 - α) * L<sub>2</sub>
+            </p>
+            <h4>5.4. Параметры</h4>
+            <p>Таблица 4. Значения гиперпараметров при обучении
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Гиперпараметр</th>
+                            <th>Значение</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Метрика</td>
+                            <td>F1-мера</td>
+                        </tr>
+                        <tr>
+                            <td>Размер batch-а</td>
+                            <td>32</td>
+                        </tr>
+                        <tr>
+                            <td>Максимальный размер предложения</td>
+                            <td>212</td>
+                        </tr>
+                        <tr>
+                            <td>α</td>
+                            <td>0.75</td>
+                        </tr>
+                        <tr>
+                            <td>Количество эпох</td>
+                            <td>100</td>
+                        </tr>
+                        <tr>
+                            <td>Patience (для Early Stopping-а на валидационной выборке)</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>Оптимизатор</td>
+                            <td>(Bert)Adam</td>
+                        </tr>
+                        <tr>
+                            <td>Weight decay</td>
+                            <td>0.01</td>
+                        </tr>
+                        <tr>
+                            <td>Скорость обучения (learning rate)</td>
+                            <td>1e-5</td>
+                        </tr>
+                        <tr>
+                            <td>Доля warmup</td>
+                            <td>0.1</td>
+                        </tr>
+                        <tr>
+                            <td>Функция активации вентиля f</td>
+                            <td>Sigmoid / ReLU</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <h4>5.5. Выборка</h4>
+            <p>
+                Мы разделили наш датасет случайным образом на <i>обучающую</i>, <i>валидационную</i>
+                и <i>тестовую</i> выборки в размере <i>34</i>, <i>5</i>, <i>15</i> статей
+                и <i>1945</i>, <i>424</i>, <i>1243</i> предложения соответственно.
+            </p>
+            <h4>5.6. Эксперименты</h4>
+            <p>
+                Мы экспериментировали с двумя типам предобученных BERT-моделей:<br>
+                <ul>
+                    <li><a href="https://huggingface.co/transformers/pretrained_models.html" target="_blank">bert-base-multilingual-cased</a>: 12-layer, 768-hidden, 12-heads, 110M parameters.
+                        Обучалась на текстах Википедии на 104 языках.</li>
+                    <li>
+                        <a href="http://docs.deeppavlov.ai/en/master/features/models/bert.html" target="_blank">RuBERT</a>: Russian, cased, 12-layer, 768-hidden, 12-heads, 180M parameters.
+                        Мультиязычная модель дообучалась на текстах русской Википедии и на новостных текстах.
+                    </li>
+                </ul>
+            </p>
+            <p>
+                Мы проводили 2 независимых эксперимента для каждой модели. В таблице приведены значения для наилучшей из 2 моделей по метрике f1-score.
+            </p>
+            <p>Таблица 5. Значения метрик для каждого типа модели (‘bert-base-multilingual-cased’)
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" colspan="2">Тип модели</th>
+                            <th colspan="3">SLC</th>
+                            <th colspan="3">FLC</th>
+                        </tr>
+                        <tr>
+                            <th>Точность</th>
+                            <th>Полнота</th>
+                            <th>F1-мера</th>
+                            <th>Точность</th>
+                            <th>Полнота</th>
+                            <th>F1-мера</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">Baseline</td>
+                            <td>0.2884</td>
+                            <td>1.0000</td>
+                            <td>0.4477</td>
+                            <td>0.0197</td>
+                            <td>0.1620</td>
+                            <td>0.0351</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">BERT</td>
+                            <td>0.6262</td>
+                            <td>0.4365</td>
+                            <td>0.5144</td>
+                            <td>0.3136</td>
+                            <td>0.1051</td>
+                            <td>0.1574</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Joint-BERT</td>
+                            <td>0.6314</td>
+                            <td>0.5353</td>
+                            <td>0.5794</td>
+                            <td>0.2690</td>
+                            <td>0.0684</td>
+                            <td>0.1090</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Granu-BERT</td>
+                            <td>0.6550</td>
+                            <td>0.4076</td>
+                            <td>0.5025</td>
+                            <td>0.2392</td>
+                            <td>0.0823</td>
+                            <td>0.1224</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">Multigranu-BERT</td>
+                            <td>Sigmoid</td>
+                            <td>0.6095</td>
+                            <td>0.4156</td>
+                            <td>0.4942</td>
+                            <td>0.2428</td>
+                            <td>0.0882</td>
+                            <td>0.1294</td>
+                        </tr>
+                        <tr>
+                            <td>ReLU</td>
+                            <td>0.5833</td>
+                            <td>0.4545</td>
+                            <td>0.5109</td>
+                            <td>0.1832</td>
+                            <td>0.0714</td>
+                            <td>0.1027</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p>Таблица 6. Значения метрик для каждого типа модели (‘rubert-base-cased’)
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" colspan="2">Тип модели</th>
+                            <th colspan="3">SLC</th>
+                            <th colspan="3">FLC</th>
+                        </tr>
+                        <tr>
+                            <th>Точность</th>
+                            <th>Полнота</th>
+                            <th>F1-мера</th>
+                            <th>Точность</th>
+                            <th>Полнота</th>
+                            <th>F1-мера</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">Baseline</td>
+                            <td>0.2884</td>
+                            <td>1.0000</td>
+                            <td>0.4477</td>
+                            <td>0.0197</td>
+                            <td>0.1620</td>
+                            <td>0.0351</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">BERT</td>
+                            <td>0.6471</td>
+                            <td>0.4658</td>
+                            <td>0.5417</td>
+                            <td>0.3635</td>
+                            <td>0.1174</td>
+                            <td>0.1775</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Joint-BERT</td>
+                            <td>0.6147</td>
+                            <td>0.4365</td>
+                            <td>0.5105</td>
+                            <td>0.2317</td>
+                            <td>0.1100</td>
+                            <td>0.1492</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Granu-BERT</td>
+                            <td>0.6596</td>
+                            <td>0.5897</td>
+                            <td>0.6227</td>
+                            <td>0.2952</td>
+                            <td>0.1075</td>
+                            <td>0.1576</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">Multigranu-BERT</td>
+                            <td>Sigmoid</td>
+                            <td>0.6462</td>
+                            <td>0.6304</td>
+                            <td>0.6382</td>
+                            <td>0.3318</td>
+                            <td>0.1060</td>
+                            <td>0.1607</td>
+                        </tr>
+                        <tr>
+                            <td>ReLU</td>
+                            <td>0.6508</td>
+                            <td>0.3994</td>
+                            <td>0.4950</td>
+                            <td>0.2994</td>
+                            <td>0.1006</td>
+                            <td>0.1506</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <h3>6. Результаты</h3>
+            <p>
+                Наилучшее качество в задаче FLC (0.1775) у стандартной модели BERT (RuBERT),
+                а в задаче SLC (0.6382) у модели Multigranu-BERT (Sigmoid).
+            </p>
+            <p>
+                Переход от 'bert-base-multilingual-cased' к 'rubert-base-cased' улучшает качество.
+            </p>
+            <p>
+                Переход от Joint-BERT к Granu-BERT и далее к Multigranu-BERT улучшает качество,
+                однако BERT может показывать лучшее качество, чем Multigranu-BERT.
+            </p>
+            <p>
+                <a href="/markup" target="_blank">Возможность размечать тексты для дальнейшего обучения на них</a> и
+                <a href="/test" target="_blank">возможность автоматически разметить на пропагандистские техники
+                произвольный текст на русском языке</a>.
+            </p>
+            <h3>7. Литература</h3>
+            <p>
+                <ul>
+                    <li>Aggarwal, K, & Sadana, A. 2019. Propaganda Detection from News Articles using Transfer Learning. Proceedings of the 2nd Workshop on NLP for Internet Freedom: Censorship, Disinformation, and Propaganda, Hong Kong, China, November 4, 2019, 143-147.</li>
+                    <li>Barrón-Cedeño A., Da San Martino G., Jaradat I., and Nakov P. 2019. Proppy: A system to unmask propaganda in online news. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 33, pages 9847–9848.</li>
+                    <li>Barrón-Cedeño A., Jaradat I., Da San Martino G., Nakov P. 2019. “Proppy: Organizing News Coverage on the Basis of Their Propagandistic Content”, Information Processing and Management.</li>
+                    <li>Bengio Y., Louradour J., Collobert R., and Weston J. 2009. Curriculum learning. In Proceedings of the 26th annual international conference on machine learning, pages 41–48. ACM.</li>
+                    <li>Clark K., Khandelwal U., Levy O., D. Manning C. 2019. What Does BERT Look at? An Analysis of BERT’s Attention. Proceedings of the 2019 ACL Workshop BlackboxNLP: Analyzing and Interpreting Neural Networks for NLP, pages 276–286, Florence, Italy.</li>
+                    <li>Conserva H. T. 2003. Propaganda Techniques. AuthorHouse (January 20, 2003).</li>
+                    <li>Da San Martino G., Barrón-Cedeño A., and Nakov P. 2019a. Findings of the nlp4if-2019 shared task on fine-grained propaganda detection. In Proceedings of the 2nd Workshop on NLP for Internet Freedom (NLP4IF): Censorship, Disinformation, and Propaganda, NLP4IF EMNLP’19, Hong Kong, China.</li>
+                    <li>Da San Martino G., Yu S., Barrón-Cedeño A., Petrov R., and Nakov P. 2019b. Fine-grained analysis of propaganda in news articles. In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and 9th International Joint Conference on Natural Language Processing, EMNLP-IJCNLP 2019, Hong Kong, China, November 3-7, 2019, EMNLP-IJCNLP 2019, Hong Kong, China.</li>
+                    <li>Devlin J., Chang M.-W., Lee K., and Toutanova K. 2018. Bert: Pre-training of deep bidirectional transformers for language understanding.</li>
+                    <li>Emermen F. 2010. Strategic Maneuvering in Argumentative Discourse: Extending the Pragma-dialectical Theory of Argumentation. p. 203.</li>
+                    <li>Filene E. 1938. Institute for Propaganda Analysis. Propaganda Analysis. New York: Columbia, University Press.</li>
+                    <li>Institute for Propaganda Analysis. 1938. How to Detect Propaganda. In Propaganda Analysis. Vol. I of the Publications of the Institute for Propaganda Analysis. chapter 2.</li>
+                    <li>Jowett, G., and O’Donnell, V. 2012. Propaganda and Persuasion. Los Angeles, CA: SAGE, 5th edition.</li>
+                    <li>Kingma D. P., Ba J. 2015. Adam: A Method for Stochastic Optimization. 3rd International Conference for Learning Representations, San Diego.</li>
+                    <li>Kuratov, Y., Arkhipov, M. 2019. Adaptation of Deep Bidirectional Multilingual Transformers for Russian Language.</li>
+                    <li>Loshchilov I., Hutter F. 2018. Fixing Weight Decay Regularization in Adam.</li>
+                    <li>Rashkin H., Choi E., Jang J. Y., Volkova S., and Choi Y. 2017. Truth of varying shades: Analyzing language in fake news and political fact-checking. In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, EMNLP’17, pages 2931–2937, Copenhagen, Denmark.</li>
+                    <li>Yoosuf, S., & Yang, Y. 2019. Fine-Grained Propaganda Detection with Fine-Tuned BERT. Proceedings of the 2nd Workshop on NLP for Internet Freedom: Censorship, Disinformation, and Propaganda, Hong Kong, China, November 4, 2019, 87-91.</li>
+                </ul>
+            </p>
+            <h3>8. Благодарности</h3>
+            <p>
+                — Екатерине Владимировне Еникеевой
+            </p>
+
+        </span>
+    </div>
+{% endblock %}

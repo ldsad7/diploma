@@ -218,6 +218,66 @@
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+
+            .info {
+                font-family: "Comic Sans MS", cursive, sans-serif;
+                font-size: 1.5vw;
+                text-align: center;
+            }
+
+            .info p {
+                margin: 20px 0 5px;
+            }
+
+            .info h3 {
+                text-align: left;
+                margin-top: 20px;
+            }
+
+            .info h4 {
+                text-align: left;
+                margin-top: 20px;
+            }
+
+            .right-info {
+                display: block;
+                font-size: 1vw;
+                text-align: right;
+                padding-right: 10px;
+                line-height: 0.5vw;
+            }
+
+            .left-info {
+                text-indent: 20px;
+                display: block;
+                font-size: 1vw;
+                text-align: left;
+                padding: 10px;
+            }
+
+            .left-info img {
+                max-width: 30%;
+            }
+
+            #myMainTable2, #myMainTable3, #myMainTable4 {
+                text-indent: 0;
+                padding: 0;
+            }
+
+            .info td, .info th {
+                white-space:pre-wrap;
+                word-wrap:break-word;
+                text-align: center;
+                vertical-align: middle !important;
+            }
+
+            td i {
+                font-style: italic !important;
+            }
+
+            .numbers {
+                list-style-type: upper-roman;
+            }
         </style>
     </head>
     <body>
@@ -241,8 +301,8 @@
                     <li class="nav-item {% block active_fourth %}{% endblock %}">
                         <a class="nav-link" href="{{ url_for('random') }}">Random</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Info</a>
+                    <li class="nav-item {% block active_fifth %}{% endblock %}">
+                        <a class="nav-link" href="{{ url_for('info') }}">Info</a>
                     </li>
                 </ul>
                 <a href="http://github.com/" target="_blank" rel="noopener noreferrer">Github</a>
