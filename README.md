@@ -1,3 +1,5 @@
+http://detectpropaganda.pythonanywhere.com/
+
 Обучение моделей производится в отдельной jupyter-тетрадке
 jupyter_notebooks/training_models.ipynb
 (мы обучали на google colab-е, поэтому там могут быть colab-специфичные куски кода).
